@@ -22,13 +22,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   cards.forEach((card, idx) => {
     if (projects[idx]) {
       const p = projects[idx];
-      const titleEl = card.querySelector(".card-title");
-      const eyebrowEl = card.querySelector(".card-eyebrow");
+      const titleEl = card.querySelector("h1");
+      const eyebrowEl = card.querySelector("p");
       const imgEl = card.querySelector("img");
       const metaEl = card.querySelector(".card-meta");
 
       if (titleEl) titleEl.textContent = p.title;
-      if (eyebrowEl) eyebrowEl.textContent = `${p.code} // ${p.category.toUpperCase()}`;
+      if (eyebrowEl) eyebrowEl.textContent = `${p.category.toUpperCase()} // ${p.code}`;
       if (imgEl) imgEl.src = p.cardImg || p.img;
       if (metaEl && p.techStack) {
         metaEl.innerHTML = p.techStack
