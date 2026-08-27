@@ -391,8 +391,52 @@ export async function checkDBStatus() {
   return { connected: false, latencyMs: 0, database: "neondb", totalProjects: 0, provider: "Offline" };
 }
 
+// AIRA-Labs Live API Endpoint (for production use: https://www.aira-lab.in/api/projects)
+// (For local testing: http://localhost:3000/api/projects)
+const API_URL = "https://www.aira-lab.in/api/projects";
+
+// Fetch projects in real-time from the database
+export async function getLiveProjects() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error("Failed to fetch live projects");
+    const dbProjects = await res.json();
+    if (!dbProjects || dbProjects.length === 0) {
+      return getProjects(); // Fallback to local default array if database has no entries
+    }
+    // Map database fields to the 3D showcase card format
+    return dbProjects.map((p, idx) => ({
+      id: p.id || `prj-${idx + 1}`,
+      code: p.code || `FR ${idx + 1 < 10 ? '0' + (idx + 1) : idx + 1}`,
+      title: p.title,
+      subtitle: p.subtitle || p.tagline || p.category || "AIRA LAB PROJECT",
+      category: p.category || "General",
+      author: p.authorName || p.author || "AiRA Lab Team",
+      desc: p.description || p.desc || "Detailed engineering breakdown and system implementation.",
+      img: p.coverImage || p.img || "/c/3d-circular-img-gallery/img1.jpg",
+      cardImg: p.coverImage || p.cardImg || p.img || "/c/brandappart-sticky-cards/card-img-1.jpg",
+      techStack: Array.isArray(p.tags) && p.tags.length > 0 ? p.tags : (Array.isArray(p.techStack) ? p.techStack : ["ROS 2", "AI", "Python"]),
+      metrics: p.metrics || {
+        fps: "60 FPS",
+        latency: "2.0 ms",
+        accuracy: "99.2%",
+        precision: "Sub-mm"
+      },
+      demoUrl: p.demoUrl || "https://aira-lab.in/projects",
+      githubUrl: p.githubUrl || "https://github.com/MeetDave-25/AiRA",
+      paperUrl: p.paperUrl || "https://aira-lab.in/about",
+      status: p.status || "DEPLOYED",
+      featured: p.featured || false
+    }));
+  } catch (err) {
+    console.warn("Using fallback local projects array due to fetch error:", err);
+    return getProjects();
+  }
+}
+
 export function resetProjects() {
   localStorage.removeItem(STORAGE_KEY);
   return INITIAL_PROJECTS;
 }
+
 

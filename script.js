@@ -1,11 +1,11 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { getProjects, fetchProjectsFromDB, addProjectToDB, checkDBStatus } from "./src/projectsData.js";
+import { getProjects, fetchProjectsFromDB, addProjectToDB, checkDBStatus, getLiveProjects } from "./src/projectsData.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // 1. Smooth scroll setup (Lenis + GSAP ticker)
   const lenis = new Lenis({
     duration: 1.2,
@@ -17,14 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   gsap.ticker.lagSmoothing(0);
 
-  // 2. Sticky Cards Deck Setup
+  // 2. Fetch projects live from Database API
+  let allProjects = await getLiveProjects();
+
+  // 3. Sticky Cards Deck Setup
   const cards = document.querySelectorAll(".sticky-cards .card");
   const totalCards = cards.length;
   const segmentSize = 1 / totalCards;
   const cardYOffset = 5;
   const cardScaleStep = 0.075;
-
-  let allProjects = getProjects();
 
   function updateStickyCards() {
     cards.forEach((card, idx) => {
@@ -90,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
-  // 3. Project Archive Grid Renderer
+  // 4. Project Archive Grid Renderer
   const projectsGrid = document.getElementById("projects-grid");
   let activeCategory = "all";
   let searchQuery = "";
@@ -152,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 4. Category & Search Event Listeners
+  // 5. Category & Search Event Listeners
   document.querySelectorAll(".cat-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
@@ -170,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 5. Project Details Modal Engine
+  // 6. Project Details Modal Engine
   const projectModal = document.getElementById("project-modal");
   const modalCloseBtn = document.getElementById("modal-close-btn");
 
@@ -229,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 6. Live Neon PostgreSQL Integration
+  // 7. Live Neon PostgreSQL Integration Status
   const dbStatusPill = document.getElementById("db-status-pill");
   const dbStatusText = document.getElementById("db-status-text");
 
@@ -249,20 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function loadProjectsFromDatabase() {
-    try {
-      const dbProjects = await fetchProjectsFromDB();
-      if (dbProjects && dbProjects.length > 0) {
-        allProjects = dbProjects;
-        updateStickyCards();
-        renderArchiveGrid();
-      }
-    } catch (err) {
-      console.warn("Using fallback local projects array:", err);
-    }
-  }
-
-  // 7. Add Project to PostgreSQL Modal & Form Logic
+  // 8. Add Project to PostgreSQL Modal & Form Logic
   const addModal = document.getElementById("add-project-modal");
   const openAddModalBtn = document.getElementById("open-add-modal-btn");
   const addModalCloseBtn = document.getElementById("add-modal-close-btn");
@@ -337,7 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initializations
   renderArchiveGrid();
-  loadProjectsFromDatabase();
   syncDBStatus();
   setInterval(syncDBStatus, 15000);
 });
