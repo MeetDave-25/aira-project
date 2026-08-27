@@ -1,0 +1,26 @@
+{
+  "name": "aira-lab-3d-gallery",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server.js",
+    "start": "concurrently \"node server.js\" \"vite\"",
+    "db:init": "node db/init.js",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "concurrently": "^10.0.5",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "gsap": "^3.12.5",
+    "lenis": "^1.3.26",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
+}
